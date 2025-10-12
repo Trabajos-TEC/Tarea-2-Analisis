@@ -1,47 +1,55 @@
-const Limit = 50;
-const poblacion = 10;
-const generaciones = 25;
-const mutationRate = 0.1;
-let generacionActual = 0;
-let conjunto = [];
+// Configuración del Algoritmo Genético
+const TAMANO_POBLACION = 10;
+const NUM_GENERACIONES = 25;
 
+// Función auxiliar para generar números aleatorios
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function evaluateSet(set){
-    let res = 0;
-    for (let i = 0; i < set.length; i++){
-        res += set[i];
-        if (res > Limit){
-            return -1
-        }
-    }
-    return 0;
-}
-
-function createSet(){
+// Crear un individuo (conjunto de números) basado en el límite
+function createSet(limite){
     let set = [];
-    let cont = 0
-    let nElements = random(1,(Limit/5))
+    let cont = 0;
+    let nElements = random(1, Math.floor(limite / 5));
+
     while (cont < nElements){
-        let num = random(1,Limit/2);
+        let num = random(1, Math.floor(limite / 2));
         cont += 1;
         set.push(num);
     }
-    return set
+    return set;
 }
 
-function createPoblation(){
-    let poblationSet = []
-    for (let i = 0; i < poblacion; i++){
-        let set = createSet();
+// Crear población inicial
+export function createPoblation(limite){
+    let poblationSet = [];
+    for (let i = 0; i < TAMANO_POBLACION; i++){
+        let set = createSet(limite);
         poblationSet.push(set);
     }
     return poblationSet;
 }
 
+// Evaluar un conjunto (devuelve la suma si no excede el límite, 0 si lo excede)
+function evaluateSet(set, limite){
+    let res = 0;
+    for (let i = 0; i < set.length; i++){
+        res += set[i];
+    }
 
+    if (res > limite){
+        return 0;
+    }
+
+    return res;
+}
+
+// Exportar constantes para uso en otros componentes
+export const CONFIG = {
+    TAMANO_POBLACION,
+    NUM_GENERACIONES
+};
 
 //Funcion de adaptabilidad, eliminamos los conjuntos de poblaciones no aptos( aquellos que la suma de sus elementos es mayor al limite)
 function fitnessFunction(poblationSet){
@@ -54,10 +62,6 @@ function fitnessFunction(poblationSet){
     return set;
 }
 
-poblacionInicialSet = fitnessFunction(createPoblation());
-generacionActual = 1;
-
-console.log(poblacionInicialSet);
 
 function cruce(poblationSet){
     let cruceSet = [];
@@ -84,13 +88,3 @@ function cruce(poblationSet){
     }
 
 }
-
-
-
-
-// Exportar constantes para uso en otros componentes
-export const CONFIG = {
-    poblacion,
-    generaciones
-};
-
