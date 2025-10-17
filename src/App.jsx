@@ -1,22 +1,42 @@
 import React, { useState } from 'react';
 import './App.css';
-import { createPoblation, CONFIG } from './configuracion_inicial';
+import { createPoblation, CONFIG, ejecutarAlgoritmoGenetico } from './configuracion_inicial';
 
+/*
+ * App
+ * Entrada: ninguna (componente React)
+ * Salida: interfaz de usuario renderizada
+ * Descripción: Componente principal que maneja la interfaz del algoritmo genético.
+ *              Controla los estados de configuración, población, ejecución y resultados.
+ */
 function App() {
   const [limite, setLimite] = useState('');
   const [isConfigured, setIsConfigured] = useState(false);
   const [error, setError] = useState('');
   const [poblacionInicial, setPoblacionInicial] = useState([]);
+  const [ejecutando, setEjecutando] = useState(false);
+  const [resultado, setResultado] = useState(null);
 
+  /*
+   * handleLimiteChange
+   * Entrada: evento de input
+   * Salida: actualización del estado limite
+   * Descripción: Valida y actualiza el valor del límite ingresado por el usuario.
+   */
   const handleLimiteChange = (e) => {
     const value = e.target.value;
-    // Solo permitir números positivos
     if (value === '' || /^[1-9]\d*$/.test(value)) {
       setLimite(value);
       setError('');
     }
   };
 
+  /*
+   * handleSubmit
+   * Entrada: evento de formulario
+   * Salida: población inicial generada
+   * Descripción: Valida el límite ingresado y genera la población inicial.
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (limite === '') {
@@ -29,23 +49,53 @@ function App() {
       return;
     }
     
-    
     const nuevaPoblacion = createPoblation(parseInt(limite));
     setPoblacionInicial(nuevaPoblacion);
     setIsConfigured(true);
     setError('');
   };
 
+  /*
+   * handleReset
+   
+   * Salida: reseteo de todos los estados
+   * Descripción: Reinicia la aplicación a su estado inicial.
+   */
   const handleReset = () => {
     setLimite('');
     setIsConfigured(false);
     setError('');
     setPoblacionInicial([]);
+    setResultado(null);
+    setEjecutando(false);
   };
 
+  /*
+   * handleRegenerarPoblacion
+  
+   * Salida: nueva población generada
+   * Descripción: Genera una nueva población inicial con el límite actual.
+   */
   const handleRegenerarPoblacion = () => {
     const nuevaPoblacion = createPoblation(parseInt(limite));
     setPoblacionInicial(nuevaPoblacion);
+    setResultado(null);
+  };
+
+  /*
+   * handleEjecutarAlgoritmo
+   * Salida: resultado del algoritmo genético
+   * Descripción: Ejecuta el algoritmo genético con la población actual y muestra resultados.
+   */
+  const handleEjecutarAlgoritmo = () => {
+    setEjecutando(true);
+    setResultado(null);
+    
+    setTimeout(() => {
+      const resultadoAG = ejecutarAlgoritmoGenetico(poblacionInicial, parseInt(limite));
+      setResultado(resultadoAG);
+      setEjecutando(false);
+    }, 500);
   };
 
   return (
@@ -58,7 +108,7 @@ function App() {
         {!isConfigured ? (
           <div className="config-section">
             <div className="card">
-              <h3> Configuración Inicial</h3>
+              <h3>Configuración Inicial</h3>
               <p className="description">
                 Ingrese el valor límite <strong>L</strong> para la suma máxima del subconjunto.
               </p>
@@ -84,12 +134,12 @@ function App() {
 
                 {error && (
                   <div className="error-message">
-                    ⚠️ {error}
+                    {error}
                   </div>
                 )}
 
                 <button type="submit" className="btn btn-primary">
-                   Iniciar Algoritmo
+                  Iniciar Algoritmo
                 </button>
               </form>
             </div>
@@ -98,13 +148,13 @@ function App() {
           <div className="result-section">
             <div className="card">
               <div className="config-display">
-                <h3> Configuración Establecida</h3>
+                <h3>Configuración Establecida</h3>
                 <div className="config-item">
                   <span className="config-label">Límite (L):</span>
                   <span className="config-value">{limite}</span>
                 </div>
                 <button onClick={handleReset} className="btn btn-secondary">
-                   Cambiar Configuración
+                  Cambiar Configuración
                 </button>
               </div>
             </div>
@@ -126,7 +176,7 @@ function App() {
                       <div className="individuo-header">
                         <span className="individuo-numero">Individuo #{index + 1}</span>
                         <span className={`individuo-badge ${esValido ? 'badge-valido' : 'badge-invalido'}`}>
-                          {esValido ? '✓ Válido' : '✗ Excede límite'}
+                          {esValido ? 'Válido' : 'Excede límite'}
                         </span>
                       </div>
                       
@@ -157,11 +207,11 @@ function App() {
 
               <div className="estadisticas-poblacion">
                 <div className="stat-item">
-                  <span className="stat-label"> Total individuos:</span>
+                  <span className="stat-label">Total individuos:</span>
                   <span className="stat-value">{poblacionInicial.length}</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-label"> Individuos válidos:</span>
+                  <span className="stat-label">Individuos válidos:</span>
                   <span className="stat-value">
                     {poblacionInicial.filter(ind => 
                       ind.reduce((acc, num) => acc + num, 0) <= parseInt(limite)
@@ -174,14 +224,108 @@ function App() {
                 </div>
               </div>
 
-              <button onClick={handleRegenerarPoblacion} className="btn btn-regenerar">
+              <button onClick={handleRegenerarPoblacion} className="btn btn-regenerar" disabled={ejecutando}>
                 Regenerar Población
               </button>
             </div>
 
-            <div className="info-message">
-               Próximo paso: Ejecutar Algoritmo Genético
-            </div>
+            {!resultado && (
+              <div className="card">
+                <h3>Ejecutar Algoritmo Genético</h3>
+                <p className="description">
+                  El algoritmo evolucionará durante <strong>{CONFIG.NUM_GENERACIONES}</strong> generaciones
+                  para encontrar el mejor subconjunto.
+                </p>
+                <button 
+                  onClick={handleEjecutarAlgoritmo} 
+                  className="btn btn-primary"
+                  disabled={ejecutando}
+                >
+                  {ejecutando ? 'Ejecutando...' : 'Iniciar Evolución'}
+                </button>
+              </div>
+            )}
+
+            {/* Visualización del Resultado */}
+            {resultado && (
+              <>
+                <div className="card resultado-final">
+                  <h3>Mejor Solución Encontrada</h3>
+                  
+                  <div className="solucion-container">
+                    <div className="solucion-info">
+                      <div className="info-row">
+                        <span className="info-label">Fitness (Suma Máxima):</span>
+                        <span className="info-valor fitness">{resultado.mejorSolucion.fitness}</span>
+                      </div>
+                      
+                      <div className="info-row">
+                        <span className="info-label">Generación Encontrada:</span>
+                        <span className="info-valor generacion">
+                          Generación #{resultado.mejorSolucion.generacion}
+                        </span>
+                      </div>
+                      
+                      <div className="info-row">
+                        <span className="info-label">Límite (L):</span>
+                        <span className="info-valor">{limite}</span>
+                      </div>
+                    </div>
+
+                    <div className="mejor-conjunto">
+                      <h4>Subconjunto Óptimo:</h4>
+                      <div className="numeros-solucion">
+                        {resultado.mejorSolucion.individuo.map((num, idx) => (
+                          <span key={idx} className="numero-solucion">
+                            {num}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      <div className="formula">
+                        {resultado.mejorSolucion.individuo.join(' + ')} = {resultado.mejorSolucion.suma}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <h3>Evolución por Generación</h3>
+                  <p className="description">
+                    Progreso del algoritmo a través de {CONFIG.NUM_GENERACIONES} generaciones.
+                    La mejor solución global se destaca.
+                  </p>
+
+                  <div className="historial-container">
+                    {resultado.historial.map((gen, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`generacion-item ${gen.esMejorGlobal ? 'mejor-global' : ''}`}
+                      >
+                        <div className="gen-numero">
+                          <span>Generación #{gen.numero}</span>
+                          {gen.esMejorGlobal && <span className="badge">Mejor Global</span>}
+                        </div>
+                        
+                        <div className="gen-info">
+                          <div className="gen-conjunto">
+                            Conjunto: [{gen.mejorIndividuo.join(', ')}]
+                          </div>
+                          
+                          <div className="gen-fitness">
+                            Suma: <strong>{gen.suma}</strong> | Fitness: <strong>{gen.fitness}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button onClick={handleReset} className="btn btn-primary">
+                  Nueva Ejecución
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
