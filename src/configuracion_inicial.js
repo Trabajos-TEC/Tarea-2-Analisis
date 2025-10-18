@@ -34,8 +34,10 @@ function shuffle(array) {
  */
 function createSet(limite) {
   let set = [];
-  let nElements = random(1, Math.floor(limite / 5));
-  let cont = 0; // Variable contador inicializada
+  
+  let maxElements = Math.min(15, Math.floor(limite / 5));
+  let nElements = random(1, Math.max(1, maxElements));
+  let cont = 0;
 
   while (cont < nElements){
     let num = random(1, Math.floor(limite / 2));
@@ -49,8 +51,7 @@ function createSet(limite) {
  * createPoblation
  * Entrada: limite
  * Salida: arreglo de individuos (población inicial)
- * Descripción: Genera la población inicial con TAMANO_POBLACION individuos.
- *              Cada individuo es creado mediante createSet.
+ * Descripción: Genera la población inicial con TAMANO_POBLACION individuos, cada individuo es creado mediante createSet.
  */
 export function createPoblation(limite) {
   let poblationSet = [];
@@ -130,9 +131,9 @@ function seleccionPorTorneo(poblacionEvaluada, tamanoTorneo = 3) {
   return [...mejor.individuo];
 }
 
-// ============================================================================
+
 // CRUCE (CROSSOVER)
-// ============================================================================
+
 
 /*
  * cruce
