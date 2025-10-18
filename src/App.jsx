@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import { createPoblation, CONFIG, ejecutarAlgoritmoGenetico } from './configuracion_inicial';
+import { createPoblation, CONFIG, ejecutarAlgoritmoGenetico, evaluateSet } from './configuracion_inicial';
 
 /*
  * App
@@ -82,13 +82,26 @@ function App() {
    * handleEjecutarAlgoritmo
    * Salida: resultado del algoritmo genético
    * Descripción: Ejecuta el algoritmo genético con la población actual y muestra resultados.
+   *              Valida que exista al menos un individuo válido antes de ejecutar.
    */
   const handleEjecutarAlgoritmo = () => {
+    // Validar que haya al menos un individuo válido (fitness > 0)
+    const limiteNum = parseInt(limite);
+    const hayIndividuoValido = poblacionInicial.some(individuo => 
+      evaluateSet(individuo, limiteNum) > 0
+    );
+    
+    if (!hayIndividuoValido) {
+      setError('No hay individuos válidos en la población. Por favor, regenere la población o aumente el valor de L.');
+      return;
+    }
+    
+    setError('');
     setEjecutando(true);
     setResultado(null);
     
     setTimeout(() => {
-      const resultadoAG = ejecutarAlgoritmoGenetico(poblacionInicial, parseInt(limite));
+      const resultadoAG = ejecutarAlgoritmoGenetico(poblacionInicial, limiteNum);
       setResultado(resultadoAG);
       setEjecutando(false);
     }, 500);
@@ -232,6 +245,13 @@ function App() {
                   El algoritmo evolucionará durante <strong>{CONFIG.NUM_GENERACIONES}</strong> generaciones
                   para encontrar el mejor subconjunto.
                 </p>
+                
+                {error && (
+                  <div className="error-message">
+                    {error}
+                  </div>
+                )}
+                
                 <button 
                   onClick={handleEjecutarAlgoritmo} 
                   className="btn btn-primary"
