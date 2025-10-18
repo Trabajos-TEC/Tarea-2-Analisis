@@ -205,7 +205,7 @@ function mutacion(individuo, limite) {
 }
 
 
-// ALGORITMO GENÉTICO PRINCIPAL
+// Algoritmo Genético Principal
 
 /*
  * ejecutarAlgoritmoGenetico

@@ -4,7 +4,7 @@ import { createPoblation, CONFIG, ejecutarAlgoritmoGenetico } from './configurac
 
 /*
  * App
- * Entrada: ninguna (componente React)
+ 
  * Salida: interfaz de usuario renderizada
  * Descripción: Componente principal que maneja la interfaz del algoritmo genético.
  *              Controla los estados de configuración, población, ejecución y resultados.
@@ -19,7 +19,6 @@ function App() {
 
   /*
    * handleLimiteChange
-   * Entrada: evento de input
    * Salida: actualización del estado limite
    * Descripción: Valida y actualiza el valor del límite ingresado por el usuario.
    */
@@ -33,7 +32,6 @@ function App() {
 
   /*
    * handleSubmit
-   * Entrada: evento de formulario
    * Salida: población inicial generada
    * Descripción: Valida el límite ingresado y genera la población inicial.
    */
@@ -57,7 +55,6 @@ function App() {
 
   /*
    * handleReset
-   
    * Salida: reseteo de todos los estados
    * Descripción: Reinicia la aplicación a su estado inicial.
    */
@@ -72,7 +69,6 @@ function App() {
 
   /*
    * handleRegenerarPoblacion
-  
    * Salida: nueva población generada
    * Descripción: Genera una nueva población inicial con el límite actual.
    */
